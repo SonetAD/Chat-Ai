@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Welcome to California State University</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
+        margin: 0;
+        padding: 0;
+      }
+
+      .chat-container {
+        max-width: 600px;
+        margin: 50px auto;
+        background-color: #1e1e1e;
+        border-radius: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .welcome-title {
+        text-align: center;
+        font-size: 24px;
+        padding: 20px;
+        color: #00ffcc;
+        background-color: #1e1e1e;
+        transition: opacity 0.5s ease;
+      }
+
+      .welcome-title.hidden {
+        opacity: 0;
+        height: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .chat-box {
+        padding: 20px;
+        height: 400px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .message {
+        max-width: 80%;
+        margin-bottom: 15px;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .user {
+        background-color: #4caf50;
+        align-self: flex-end;
+        text-align: right;
+        color: white;
+      }
+
+      .bot {
+        background-color: #2c2c2c;
+        align-self: flex-start;
+      }
+
+      .input-area {
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        background-color: #2a2a2a;
+        border-top: 1px solid #444;
+      }
+
+      .input-area input {
+        width: 80%;
+        padding: 10px;
+        border-radius: 15px;
+        border: none;
+        background-color: #333;
+        color: #fff;
+        outline: none;
+      }
+
+      .input-area button {
+        background-color: #00bfa5;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        padding: 12px;
+        cursor: pointer;
+        font-size: 20px;
+      }
+
+      .input-area button:hover {
+        background-color: #009688;
+      }
+
+      .typing {
+        font-style: italic;
+        color: #999;
+        margin: 10px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <!-- Title shown at the top only before the first message -->
+      <div
+        class="welcome-title"
+        id="welcome-title"
+      >
+        🎓 Welcome to CSU Admission Chatbot
+      </div>
+
+      <div
+        class="chat-box"
+        id="chat-box"
+      ></div>
+
+      <div
+        class="typing"
+        id="typing"
+      >
+        Bot is typing...
+      </div>
+
+      <div class="input-area">
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Ask me about California State University..."
+        />
+        <button id="send-button">➡</button>
+      </div>
+    </div>
+
+    <script>
+      const sendButton = document.getElementById('send-button');
+      const userInput = document.getElementById('user-input');
+      const chatBox = document.getElementById('chat-box');
+      const typingIndicator = document.getElementById('typing');
+      const welcomeTitle = document.getElementById('welcome-title');
+
+      function appendMessage(message, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', sender);
+        messageElement.textContent = message;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      const getBotResponse = async (userMessage) => {
+        const response = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: userMessage }),
+        });
+        const data = await response.json();
+        return data.answer;
+      };
+
+      const handleUserMessage = async () => {
+        const userMessage = userInput.value.trim();
+        if (!userMessage) return;
+
+        // Hide the title after first message
+        if (!welcomeTitle.classList.contains('hidden')) {
+          welcomeTitle.classList.add('hidden');
+        }
+
+        appendMessage(userMessage, 'user');
+        userInput.value = '';
+        typingIndicator.style.display = 'block';
+
+        const botMessage = await getBotResponse(userMessage);
+        appendMessage(botMessage, 'bot');
+        typingIndicator.style.display = 'none';
+      };
+
+      sendButton.addEventListener('click', handleUserMessage);
+      userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleUserMessage();
+        }
+      });
+
+      // Auto-focus input
+      window.onload = () => {
+        userInput.focus();
+      };
+    </script>
+  </body>
+</html>
