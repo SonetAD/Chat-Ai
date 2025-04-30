@@ -1,12 +1,6 @@
-version: "3"
-
 services:
   ollama:
     image: ollama/ollama
+    container_name: ollama
     ports:
-      - "11434:11434"
-    volumes:
-      - ollama:/root/.ollama # persists downloaded models
-
-volumes:
-  ollama:
+      - '11434:11434'
